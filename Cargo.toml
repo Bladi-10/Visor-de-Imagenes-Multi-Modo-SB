@@ -1,0 +1,16 @@
+[package]
+name = "herramientas-sistema"
+version = "0.1.0"
+edition = "2021"
+authors = ["Equipo de Desarrollo"]
+description = "Visor de imagenes multi-modo desarrollado en Rust, GTK4 y Relm4"
+
+[dependencies]
+gtk = { package = "gtk4", version = "0.9" }
+adw = { package = "libadwaita", version = "0.7" }
+relm4 = { version = "0.9", features = ["libadwaita"] }
+relm4-components = "0.9"
+rayon = "1.10"
+image = "0.25"
+kamadak-exif = "0.5"
+trash = "5.1"
