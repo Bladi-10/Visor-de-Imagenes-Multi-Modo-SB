@@ -40,6 +40,20 @@
   - Integración de `gtk::GestureDrag` para panning y desplazamiento con clic izquierdo mantenido.
   - Ajuste de escalado en Zoom Out (`-`) para permitir reducir la imagen por debajo del tamaño de la UI inicial.
   - Restauración del atajo de Pantalla Completa a `F11` estándar.
+- [x] **Actualización de Atajo de Teclado**:
+  - Cambio del atajo global del Modo Ultra Limpio de `Ctrl + F11` a `Ctrl + R` en `src/app/view.rs`.
+  - Actualización del manual interactivo en `src/components/manual_dialog.rs` y la documentación del usuario en `Document/manual_usuario.md`.
+
+---
+
+## Próximas Tareas (Pendientes)
+
+- [ ] **Configuración del Comportamiento del Modo Ultra Limpio**:
+  - Revisar y configurar adecuadamente la transición, elementos ocultos y experiencia general de uso del Modo Ultra Limpio (`Ctrl + R`).
+- [ ] **Ajuste del Ancho de la Barra Lateral (Sidebar)**:
+  - Reducir y optimizar las dimensiones del panel lateral de detalles EXIF y propiedades del sistema, el cual actualmente ocupa demasiado espacio en la pantalla.
+
+
 
 
 
