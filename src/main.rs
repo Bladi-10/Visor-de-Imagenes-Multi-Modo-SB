@@ -12,6 +12,10 @@ fn main() {
     let provider = gtk::CssProvider::new();
     provider.load_from_data(
         "
+        headerbar {
+            border-bottom: none;
+            box-shadow: none;
+        }
         .clean-viewport {
             margin: 0px;
             padding: 0px;

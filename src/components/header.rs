@@ -9,7 +9,7 @@ pub struct HeaderComponent {
     btn_mode_2: gtk::ToggleButton,
     btn_mode_3: gtk::ToggleButton,
     btn_mode_4: gtk::ToggleButton,
-    lbl_status: gtk::Label,
+    box_zoom: gtk::Box,
 }
 
 impl HeaderComponent {
@@ -19,21 +19,24 @@ impl HeaderComponent {
         // Botones de la izquierda
         let box_left = gtk::Box::new(gtk::Orientation::Horizontal, 4);
 
-        let btn_info = gtk::Button::from_icon_name("info-symbolic");
+        let btn_theme = gtk::Button::from_icon_name("weather-clear-night-symbolic");
+        btn_theme.add_css_class("flat");
+        btn_theme.set_tooltip_text(Some("Alternar Modo Oscuro / Claro"));
+        let sender_theme = sender.clone();
+        btn_theme.connect_clicked(move |_| {
+            sender_theme.send(AppMsg::ToggleDarkMode).unwrap();
+        });
+
+        let btn_info = gtk::Button::from_icon_name("dialog-information-symbolic");
+        btn_info.add_css_class("flat");
         btn_info.set_tooltip_text(Some("Manual de Usuario (Info)"));
         let sender_info = sender.clone();
         btn_info.connect_clicked(move |_| {
             sender_info.send(AppMsg::ShowUserManual).unwrap();
         });
 
-        let btn_fullscreen = gtk::Button::from_icon_name("view-fullscreen-symbolic");
-        btn_fullscreen.set_tooltip_text(Some("Pantalla Completa (F11)"));
-        let sender_fs = sender.clone();
-        btn_fullscreen.connect_clicked(move |_| {
-            sender_fs.send(AppMsg::ToggleFullscreen).unwrap();
-        });
-
         let btn_open_file = gtk::Button::from_icon_name("document-open-symbolic");
+        btn_open_file.add_css_class("flat");
         btn_open_file.set_tooltip_text(Some("Abrir Archivo de Imagen"));
         let sender_file = sender.clone();
         btn_open_file.connect_clicked(move |_| {
@@ -41,14 +44,15 @@ impl HeaderComponent {
         });
 
         let btn_open_folder = gtk::Button::from_icon_name("folder-open-symbolic");
+        btn_open_folder.add_css_class("flat");
         btn_open_folder.set_tooltip_text(Some("Abrir Carpeta de Imágenes"));
         let sender_folder = sender.clone();
         btn_open_folder.connect_clicked(move |_| {
             sender_folder.send(AppMsg::OpenFolder).unwrap();
         });
 
+        box_left.append(&btn_theme);
         box_left.append(&btn_info);
-        box_left.append(&btn_fullscreen);
         box_left.append(&btn_open_file);
         box_left.append(&btn_open_folder);
         header_bar.pack_start(&box_left);
@@ -89,68 +93,69 @@ impl HeaderComponent {
         box_center.append(&btn_mode_3);
         box_center.append(&btn_mode_4);
 
-        let lbl_status = gtk::Label::new(Some("Visor de Imágenes"));
-        let title_box = gtk::Box::new(gtk::Orientation::Vertical, 2);
-        title_box.append(&lbl_status);
-        title_box.append(&box_center);
-
-        header_bar.set_title_widget(Some(&title_box));
+        header_bar.set_title_widget(Some(&box_center));
 
         // Controles de la Derecha
         let box_right = gtk::Box::new(gtk::Orientation::Horizontal, 4);
 
+        let box_zoom = gtk::Box::new(gtk::Orientation::Horizontal, 4);
+
         let btn_zoom_out = gtk::Button::from_icon_name("zoom-out-symbolic");
+        btn_zoom_out.add_css_class("flat");
+        btn_zoom_out.set_tooltip_text(Some("Alejar Zoom"));
         let sender_zo = sender.clone();
         btn_zoom_out.connect_clicked(move |_| {
             sender_zo.send(AppMsg::ZoomOut).unwrap();
         });
 
         let btn_zoom_in = gtk::Button::from_icon_name("zoom-in-symbolic");
+        btn_zoom_in.add_css_class("flat");
+        btn_zoom_in.set_tooltip_text(Some("Acercar Zoom"));
         let sender_zi = sender.clone();
         btn_zoom_in.connect_clicked(move |_| {
             sender_zi.send(AppMsg::ZoomIn).unwrap();
         });
 
-        let btn_zoom_1 = gtk::Button::with_label("1:1");
+        let btn_zoom_1 = gtk::Button::from_icon_name("zoom-original-symbolic");
+        btn_zoom_1.add_css_class("flat");
+        btn_zoom_1.set_tooltip_text(Some("Tamaño Real 1:1"));
         let sender_z1 = sender.clone();
         btn_zoom_1.connect_clicked(move |_| {
             sender_z1.send(AppMsg::ZoomReset).unwrap();
         });
 
-        let btn_zoom_fit = gtk::Button::with_label("Fit");
+        let btn_zoom_fit = gtk::Button::from_icon_name("zoom-fit-best-symbolic");
+        btn_zoom_fit.add_css_class("flat");
+        btn_zoom_fit.set_tooltip_text(Some("Ajustar a Pantalla"));
         let sender_zf = sender.clone();
         btn_zoom_fit.connect_clicked(move |_| {
             sender_zf.send(AppMsg::ZoomFit).unwrap();
         });
 
+        box_zoom.append(&btn_zoom_out);
+        box_zoom.append(&btn_zoom_in);
+        box_zoom.append(&btn_zoom_1);
+        box_zoom.append(&btn_zoom_fit);
+
         let btn_sidebar = gtk::Button::from_icon_name("sidebar-show-symbolic");
+        btn_sidebar.add_css_class("flat");
         btn_sidebar.set_tooltip_text(Some("Alternar Panel de Detalles (Ctrl+E)"));
         let sender_side = sender.clone();
         btn_sidebar.connect_clicked(move |_| {
             sender_side.send(AppMsg::ToggleSidebar).unwrap();
         });
 
-        let btn_minimize = gtk::Button::from_icon_name("window-minimize-symbolic");
-        btn_minimize.set_tooltip_text(Some("Minimizar Ventana"));
-        let sender_min = sender.clone();
-        btn_minimize.connect_clicked(move |_| {
-            sender_min.send(AppMsg::MinimizeWindow).unwrap();
+        let btn_fullscreen = gtk::Button::from_icon_name("view-fullscreen-symbolic");
+        btn_fullscreen.add_css_class("flat");
+        btn_fullscreen.set_tooltip_text(Some("Pantalla Completa (F11)"));
+        let sender_fs = sender.clone();
+        btn_fullscreen.connect_clicked(move |_| {
+            sender_fs.send(AppMsg::ToggleFullscreen).unwrap();
         });
 
-        let btn_maximize = gtk::Button::from_icon_name("window-maximize-symbolic");
-        btn_maximize.set_tooltip_text(Some("Maximizar Ventana"));
-        let sender_max = sender.clone();
-        btn_maximize.connect_clicked(move |_| {
-            sender_max.send(AppMsg::MaximizeWindow).unwrap();
-        });
-
-        box_right.append(&btn_zoom_out);
-        box_right.append(&btn_zoom_in);
-        box_right.append(&btn_zoom_1);
-        box_right.append(&btn_zoom_fit);
+        box_right.append(&box_zoom);
         box_right.append(&btn_sidebar);
-        box_right.append(&btn_minimize);
-        box_right.append(&btn_maximize);
+        box_right.append(&btn_fullscreen);
 
         header_bar.pack_end(&box_right);
 
@@ -160,7 +165,7 @@ impl HeaderComponent {
             btn_mode_2,
             btn_mode_3,
             btn_mode_4,
-            lbl_status,
+            box_zoom,
         }
     }
 
@@ -172,14 +177,6 @@ impl HeaderComponent {
             ViewMode::Quad => self.btn_mode_4.set_active(true),
         }
 
-        if model.images.is_empty() {
-            self.lbl_status.set_label("Visor de Imágenes");
-        } else {
-            self.lbl_status.set_label(&format!(
-                "Imagen {} de {}",
-                model.current_index + 1,
-                model.images.len()
-            ));
-        }
+        self.box_zoom.set_visible(model.view_mode == ViewMode::Single);
     }
 }

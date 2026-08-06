@@ -25,6 +25,7 @@ pub struct ImageItem {
 }
 
 impl ImageItem {
+    #[allow(dead_code)]
     pub fn new(path: PathBuf) -> Self {
         let meta = extract_metadata(&path);
         let texture = gdk::Texture::from_filename(&path).ok();
@@ -33,6 +34,27 @@ impl ImageItem {
             texture,
             metadata: Some(meta),
         }
+    }
+
+    pub fn new_lazy(path: PathBuf) -> Self {
+        Self {
+            path,
+            texture: None,
+            metadata: None,
+        }
+    }
+
+    pub fn load_texture(&mut self) {
+        if self.texture.is_none() {
+            self.texture = gdk::Texture::from_filename(&self.path).ok();
+        }
+        if self.metadata.is_none() {
+            self.metadata = Some(extract_metadata(&self.path));
+        }
+    }
+
+    pub fn unload_texture(&mut self) {
+        self.texture = None;
     }
 }
 
@@ -69,11 +91,45 @@ impl AppModel {
         Self::default()
     }
 
+    pub fn get_window_indices(&self) -> Vec<usize> {
+        let n = self.images.len();
+        if n == 0 {
+            return Vec::new();
+        }
+        if n <= 6 {
+            return (0..n).collect();
+        }
+
+        let mut indices = Vec::with_capacity(6);
+        for offset in -1isize..=4isize {
+            let idx = (self.current_index as isize + offset).rem_euclid(n as isize) as usize;
+            if !indices.contains(&idx) {
+                indices.push(idx);
+            }
+        }
+        indices
+    }
+
+    pub fn update_loaded_window(&mut self) {
+        if self.images.is_empty() {
+            return;
+        }
+        let window_indices = self.get_window_indices();
+        for (i, item) in self.images.iter_mut().enumerate() {
+            if window_indices.contains(&i) {
+                item.load_texture();
+            } else {
+                item.unload_texture();
+            }
+        }
+    }
+
     pub fn next_image(&mut self) {
         if self.images.is_empty() {
             return;
         }
         self.current_index = (self.current_index + 1) % self.images.len();
+        self.update_loaded_window();
     }
 
     pub fn prev_image(&mut self) {
@@ -85,6 +141,7 @@ impl AppModel {
         } else {
             self.current_index -= 1;
         }
+        self.update_loaded_window();
     }
 
     pub fn visible_indices(&self) -> Vec<usize> {
@@ -117,6 +174,7 @@ impl AppModel {
             self.current_index = self.images.len() - 1;
         }
 
+        self.update_loaded_window();
         self.undo_stack.push(record.clone());
         Some(record)
     }
@@ -133,15 +191,17 @@ impl AppModel {
             self.current_index = self.images.len() - 1;
         }
 
+        self.update_loaded_window();
         Some(item.path)
     }
 
     pub fn undo_last_delete(&mut self) -> bool {
         if let Some(record) = self.undo_stack.pop() {
-            let restored_item = ImageItem::new(record.original_path);
+            let restored_item = ImageItem::new_lazy(record.original_path);
             let target_index = record.original_index.min(self.images.len());
             self.images.insert(target_index, restored_item);
             self.current_index = target_index;
+            self.update_loaded_window();
             true
         } else {
             false
@@ -196,5 +256,25 @@ mod tests {
         model.current_index = 3;
         model.view_mode = ViewMode::Quad;
         assert_eq!(model.visible_indices(), vec![3, 4, 0, 1]);
+    }
+
+    #[test]
+    fn test_window_indices_6_images() {
+        let mut model = AppModel::new();
+        for i in 0..10 {
+            model.images.push(ImageItem::new_lazy(PathBuf::from(format!("{}.jpg", i))));
+        }
+
+        // current_index = 0 -> -1(9), 0(0), +1(1), +2(2), +3(3), +4(4)
+        model.current_index = 0;
+        assert_eq!(model.get_window_indices(), vec![9, 0, 1, 2, 3, 4]);
+
+        // current_index = 5 -> -1(4), 0(5), +1(6), +2(7), +3(8), +4(9)
+        model.current_index = 5;
+        assert_eq!(model.get_window_indices(), vec![4, 5, 6, 7, 8, 9]);
+
+        // current_index = 9 -> -1(8), 0(9), +1(0), +2(1), +3(2), +4(3)
+        model.current_index = 9;
+        assert_eq!(model.get_window_indices(), vec![8, 9, 0, 1, 2, 3]);
     }
 }

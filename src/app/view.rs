@@ -142,6 +142,23 @@ impl SimpleComponent for AppModel {
 
         root.add_controller(key_controller);
 
+        // Controlador de Movimiento del Mouse para Barra Flotante en Pantalla Completa
+        let motion_controller = gtk::EventControllerMotion::new();
+        let header_bar = header.header_bar.clone();
+        motion_controller.connect_motion(move |_, _x, y| {
+            if let Some(win) = relm4::main_application().active_window() {
+                if win.is_fullscreen() {
+                    if y <= 25.0 {
+                        header_bar.set_visible(true);
+                    } else if y > 60.0 {
+                        header_bar.set_visible(false);
+                    }
+                }
+            }
+        });
+
+        root.add_controller(motion_controller);
+
         let widgets = AppWidgets {
             window: root,
             main_vbox,
@@ -169,6 +186,14 @@ impl SimpleComponent for AppModel {
                 self.is_clean_ui = !self.is_clean_ui;
                 if self.is_clean_ui {
                     self.is_fullscreen = true;
+                }
+            }
+            AppMsg::ToggleDarkMode => {
+                let style_manager = adw::StyleManager::default();
+                if style_manager.is_dark() {
+                    style_manager.set_color_scheme(adw::ColorScheme::ForceLight);
+                } else {
+                    style_manager.set_color_scheme(adw::ColorScheme::ForceDark);
                 }
             }
             AppMsg::MinimizeWindow => {
@@ -207,18 +232,27 @@ impl SimpleComponent for AppModel {
             AppMsg::SelectActiveImage(idx) => {
                 if idx < self.images.len() {
                     self.current_index = idx;
+                    self.update_loaded_window();
                 }
             }
             AppMsg::SetViewMode(mode) => {
                 self.view_mode = mode;
             }
             AppMsg::ZoomIn => {
-                self.is_fit_mode = false;
-                self.zoom_level = (self.zoom_level * 1.25).min(5.0);
+                if self.is_fit_mode {
+                    self.is_fit_mode = false;
+                    self.zoom_level = 1.25;
+                } else {
+                    self.zoom_level = (self.zoom_level * 1.25).min(10.0);
+                }
             }
             AppMsg::ZoomOut => {
-                self.is_fit_mode = false;
-                self.zoom_level = (self.zoom_level / 1.25).max(0.1);
+                if self.is_fit_mode {
+                    self.is_fit_mode = false;
+                    self.zoom_level = 0.8;
+                } else {
+                    self.zoom_level = (self.zoom_level / 1.25).max(0.05);
+                }
             }
             AppMsg::ZoomReset => {
                 self.is_fit_mode = false;
@@ -248,14 +282,16 @@ impl SimpleComponent for AppModel {
             }
             AppMsg::SingleFileSelected(Some(path)) => {
                 self.images.clear();
-                self.images.push(ImageItem::new(path));
+                self.images.push(ImageItem::new_lazy(path));
                 self.current_index = 0;
+                self.update_loaded_window();
             }
             AppMsg::SingleFileSelected(None) => {}
             AppMsg::FolderSelected(Some(folder_path)) => {
                 let paths = ImageLoader::scan_directory(&folder_path);
-                self.images = paths.into_iter().map(ImageItem::new).collect();
+                self.images = paths.into_iter().map(ImageItem::new_lazy).collect();
                 self.current_index = 0;
+                self.update_loaded_window();
             }
             AppMsg::FolderSelected(None) => {}
             AppMsg::TrashActiveImage => {
@@ -303,8 +339,12 @@ impl SimpleComponent for AppModel {
             widgets.window.set_fullscreened(true);
             widgets.header.header_bar.set_visible(false);
             widgets.sidebar.container.set_visible(false);
+        } else if self.is_fullscreen {
+            widgets.window.set_fullscreened(true);
+            widgets.sidebar.container.set_visible(self.is_sidebar_open);
+            widgets.header.header_bar.set_visible(false);
         } else {
-            widgets.window.set_fullscreened(self.is_fullscreen);
+            widgets.window.set_fullscreened(false);
             widgets.header.header_bar.set_visible(true);
             widgets.sidebar.container.set_visible(self.is_sidebar_open);
         }

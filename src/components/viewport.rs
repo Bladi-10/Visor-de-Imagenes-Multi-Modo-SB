@@ -90,11 +90,6 @@ impl ViewportComponent {
         let visible_indices = model.visible_indices();
         for idx in visible_indices {
             if let Some(item) = model.images.get(idx) {
-                let frame = gtk::Frame::builder()
-                    .hexpand(true)
-                    .vexpand(true)
-                    .build();
-
                 let scroll = gtk::ScrolledWindow::builder()
                     .hscrollbar_policy(gtk::PolicyType::Automatic)
                     .vscrollbar_policy(gtk::PolicyType::Automatic)
@@ -102,8 +97,35 @@ impl ViewportComponent {
                     .vexpand(true)
                     .build();
 
+                let drag = gtk::GestureDrag::new();
+                let scroll_clone = scroll.clone();
+                let start_h = std::rc::Rc::new(std::cell::Cell::new(0.0));
+                let start_v = std::rc::Rc::new(std::cell::Cell::new(0.0));
+
+                let start_h_begin = start_h.clone();
+                let start_v_begin = start_v.clone();
+                let scroll_begin = scroll.clone();
+
+                drag.connect_drag_begin(move |_, _, _| {
+                    let h = scroll_begin.hadjustment();
+                    let v = scroll_begin.vadjustment();
+                    start_h_begin.set(h.value());
+                    start_v_begin.set(v.value());
+                });
+
+                drag.connect_drag_update(move |_, offset_x, offset_y| {
+                    let h = scroll_clone.hadjustment();
+                    let v = scroll_clone.vadjustment();
+                    h.set_value(start_h.get() - offset_x);
+                    v.set_value(start_v.get() - offset_y);
+                });
+
+                scroll.add_controller(drag);
+
                 if let Some(texture) = &item.texture {
                     let picture = gtk::Picture::for_paintable(texture);
+                    picture.set_halign(gtk::Align::Center);
+                    picture.set_valign(gtk::Align::Center);
                     picture.set_can_shrink(model.is_fit_mode);
 
                     if !model.is_fit_mode {
@@ -117,12 +139,11 @@ impl ViewportComponent {
 
                     scroll.set_child(Some(&picture));
                 } else {
-                    let lbl_err = gtk::Label::new(Some("No se pudo cargar la vista previa de la imagen"));
+                    let lbl_err = gtk::Label::new(Some("Cargando vista previa de la imagen..."));
                     scroll.set_child(Some(&lbl_err));
                 }
 
-                frame.set_child(Some(&scroll));
-                self.row_box.append(&frame);
+                self.row_box.append(&scroll);
             }
         }
     }

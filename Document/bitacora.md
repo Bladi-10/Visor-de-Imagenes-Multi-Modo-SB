@@ -50,3 +50,47 @@
   - Se implementó el diálogo modal de confirmación de borrado permanente con `gtk::MessageDialog` y botones de acción Destructiva/Cancelar.
   - Se conectaron los controladores de botones de minimizar (`win.minimize()`) y maximizar/restaurar (`win.maximize()` / `win.unmaximize()`).
   - Se limpiaron todas las advertencias de código no utilizado mediante directivas `#[allow(dead_code)]`. Compilación y pruebas de nuevo verificadas con 0 advertencias y 0 errores.
+
+### Entrada 8: Creación de Manifiesto .gitignore y Commit Inicial
+- **Fecha**: 28 de Julio de 2026
+- **Detalles**:
+  - Se creó el archivo `.gitignore` configurando el descarte de artefactos de compilación en `/target/` y de la carpeta `Retro/`.
+  - Se realizó el commit inicial en el repositorio git con todos los componentes del sistema y la documentación.
+
+### Entrada 9: Refactorización de Interfaz según Retroalimentación Visual (Retro 1.png)
+- **Fecha**: 5 de Agosto de 2026
+- **Detalles**:
+  - Se verificó la omisión en `.gitignore` de la carpeta `Retro/` y artefactos de compilación.
+  - Se actualizó el componente `src/components/header.rs` según las observaciones de `Retro/Retro 1.png`:
+    - Reemplazo del icono del botón de información por el icono simbólico monocromático `dialog-information-symbolic` con estilo `flat`.
+    - Eliminación de la etiqueta de texto central ("Imagen X de Y") dejando únicamente centrado el selector de modos de vista.
+    - Sustitución de las etiquetas de texto de los botones "1:1" y "Fit" por iconos simbólicos `zoom-original-symbolic` y `zoom-fit-best-symbolic`, eliminando el fondo y la sombra cuadrada con la clase CSS `flat`.
+    - Eliminación de los botones manuales de minimizar y maximizar de la barra superior para evitar duplicidad con los botones de control nativos de Libadwaita.
+  - Se ejecutaron las pruebas unitarias automatizadas (`cargo test`), aprobando los 8 test del sistema sin errores.
+
+### Entrada 10: Optimización de Rendimiento (Ventana de 6 Imágenes) y Mejoras de UI (Retro 2.png)
+- **Fecha**: 6 de Agosto de 2026
+- **Detalles**:
+  - Se implementó la ventana deslizante de memoria de 6 imágenes (`new_lazy`, `load_texture`, `unload_texture`, `get_window_indices` y `update_loaded_window`) en `src/app/model.rs` y `src/app/view.rs`.
+  - Al abrir carpetas masivas de 1,000+ imágenes, solo se mantienen cargadas en memoria RAM 6 imágenes (1 atrás, la actual y 4 adelante). Las texturas fuera de ese rango se descargan automáticamente, manteniendo nulo el impacto en RAM/Swap.
+  - Se agregó el botón con icono nativo `dark-mode-symbolic` para alternar entre el modo oscuro y claro de Libadwaita.
+  - Se trasladó el botón de Pantalla Completa al bloque derecho de la barra de herramientas y se actualizó su atajo global a `Alt+F11`.
+  - Se implementó el menú flotante en pantalla completa que aparece cuando el cursor se sitúa cerca del límite superior de la pantalla (`y <= 25px`).
+  - Se eliminó el marco `gtk::Frame` alrededor de las imágenes en `src/components/viewport.rs`, descartando el borde blanco rectangular.
+  - Se añadió la regla CSS para eliminar la línea negra inferior divisoria de la barra de título en `src/main.rs`.
+  - Se añadieron pruebas unitarias automatizadas (`test_window_indices_6_images`), alcanzando 9/9 tests pasados con éxito.
+
+### Entrada 11: Correcciones de UI, Gestor de Arrastre con Mouse y Zoom Dinámico (Retro 3.png)
+- **Fecha**: 6 de Agosto de 2026
+- **Detalles**:
+  - Se solucionó el icono roto de modo oscuro en `src/components/header.rs` empleando el nombre estándar `weather-clear-night-symbolic`.
+  - Se corrigió el formateo Pango en `src/components/manual_dialog.rs` escapando los caracteres `<` y `>` (`&lt;` y `&gt;`), eliminando etiquetas HTML literales visibles.
+  - Se agruparon los botones de zoom en `box_zoom` dentro de `src/components/header.rs`, configurando su visibilidad dinámica para mostrarse en el modo de 1 imagen y ocultarse automáticamente en los modos múltiples (2, 3, 4 imágenes).
+  - Se mejoró la lógica de Zoom Out (`-`) en `src/app/view.rs` para permitir reducciones escalonadas por debajo del tamaño de ajuste/UI inicial.
+  - Se incorporó `gtk::GestureDrag` en `src/components/viewport.rs` permitiendo desplazamiento panning al arrastrar la imagen con clic izquierdo.
+  - Se restauró el atajo de pantalla completa a `F11` estándar.
+  - Se ejecutaron las 9 pruebas unitarias automatizadas del sistema (`cargo test`) con resultado exitoso.
+
+
+
+

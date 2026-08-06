@@ -76,3 +76,4 @@ Para modificar o inspeccionar componentes específicos, consulte las siguientes 
 2. `AppModel` actualiza `view_mode` a `ViewMode::Quad`.
 3. `./src/components/viewport.rs` recibe la notificación y configura un contenedor horizontal (`gtk::Box` con orientación `Horizontal`).
 4. Las 4 imágenes activas contiguas se renderizan de izquierda a derecha en una sola fila continua.
+

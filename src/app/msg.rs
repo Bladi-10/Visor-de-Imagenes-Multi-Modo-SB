@@ -7,6 +7,7 @@ pub enum AppMsg {
     // Control de Ventana y Modos Visuales
     ToggleFullscreen,
     ToggleCleanUI,
+    ToggleDarkMode,
     MinimizeWindow,
     MaximizeWindow,
     CloseApp,

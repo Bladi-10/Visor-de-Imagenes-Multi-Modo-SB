@@ -38,8 +38,8 @@ pub fn show_manual_dialog(parent: &gtk::Window) {
             • Tecla 3: Vista de 3 imágenes en fila\n\
             • Tecla 4: Vista de 4 imágenes en fila continua\n\n\
             <b>Navegación:</b>\n\
-            • Flecha Izquierda / Botón < : Imagen anterior\n\
-            • Flecha Derecha / Botón > : Imagen siguiente\n\n\
+            • Flecha Izquierda / Botón &lt; : Imagen anterior\n\
+            • Flecha Derecha / Botón &gt; : Imagen siguiente\n\n\
             <b>Modo Ultra Limpio:</b>\n\
             • Ctrl + F11: Oculta interfaz y muestra solo las imágenes\n\n\
             <b>Gestión de Archivos:</b>\n\
