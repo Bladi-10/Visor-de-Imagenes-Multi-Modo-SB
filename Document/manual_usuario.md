@@ -49,8 +49,11 @@ Mediante el selector en la barra superior (HeaderBar) o usando las teclas numér
 - Al presionar **Ctrl + Z**, la imagen retenida vuelve inmediatamente a su ubicación original en disco.
 - **Ventaja**: No se genera ningún archivo duplicado en la papelera del sistema operativo.
 
-### 5.3 Confirmación al Cerrar
-- Al cerrar la aplicación, los archivos que permanezcan en la carpeta de retención y que no hayan sido restaurados con `Ctrl + Z` se envían automáticamente a la papelera del sistema operativo (`trash::delete`).
+### 5.3 Diálogo de Confirmación al Cerrar
+- Si al intentar cerrar la aplicación (tecla `ESC` o botón `X` de la ventana) existen imágenes en la papelera de retención temporal, la aplicación despliega un diálogo de confirmación interactivo con 3 opciones:
+  1. **Enviar a Papelera y Salir**: Transfiere los archivos a la papelera del SO (`trash::delete`), verifica el éxito de la operación y la limpieza del directorio temporal y cierra el aplicativo.
+  2. **Descartar Cambios y Salir**: Restaura automáticamente todas las imágenes de retención de regreso a sus **directorios y rutas originales**, verifica la existencia de cada archivo en disco y cierra la aplicación.
+  3. **Cancelar**: Cierra el diálogo y permite continuar la sesión de trabajo.
 
 ---
 

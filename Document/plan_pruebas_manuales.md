@@ -118,3 +118,50 @@ Comprobar que la navegación entre directorios dentro de la ventana de selecció
 
 ### Criterio de Éxito:
 - El cambio de directorio en el selector de archivos es instantáneo y fluido, idéntico al comportamiento nativo de Thunar/Nautilus.
+
+---
+
+## 7. Prueba de Renderizado Inmediato al Alternar Modos de Vista (`1, 2, 3, 4`)
+
+### Objetivo:
+Comprobar que al cambiar el modo de vista mediante las teclas de atajo `1`, `2`, `3` o `4` (o los botones de la barra superior), las nuevas imágenes visibles se renderizan **inmediatamente** sin requerir presionar las teclas de dirección.
+
+### Pasos a ejecutar:
+1. Abra el visor de imágenes con un catálogo de al menos 10 imágenes.
+2. Inicie en modo **1** (1 imagen).
+3. Presione la tecla **3**:
+   - Verifique que las 3 imágenes en fila se renderizan al instante en la pantalla sin mostrar avisos de *"Cargando vista previa..."*.
+4. Presione la tecla **4**:
+   - Verifique que la cuarta imagen se suma y renderiza de inmediato en la fila continua.
+5. Presione la tecla **2** y luego **1**:
+   - Compruebe la respuesta instantánea del renderizado.
+
+### Criterio de Éxito:
+- El cambio de modo renderiza inmediatamente todas las imágenes de los nuevos slots sin necesidad de presionar `<-` o `->`.
+
+---
+
+## 8. Prueba del Diálogo de Confirmación de Cierre con Verificación (`Punto 5`)
+
+### Objetivo:
+Verificar que al cerrar la aplicación con imágenes en retención temporal, se despliega el diálogo de confirmación y se validan las opciones de borrado definitivo y restauración a carpeta de origen.
+
+### Pasos a ejecutar:
+1. **Prueba 8A (Descartar Cambios y Salir):**
+   - Abra el visor y cargue una carpeta con imágenes de prueba.
+   - Elimine 2 imágenes con la tecla **Delete / Supr**.
+   - Presione **ESC** o haga clic en el botón **X** de la ventana.
+   - En el diálogo modal desplegado, seleccione **"Descartar Cambios y Salir"**.
+   - Abra el gestor de archivos nativo y compruebe que las 2 imágenes eliminadas **han regresado intactas a su carpeta original**.
+2. **Prueba 8B (Enviar a Papelera y Salir con Verificación):**
+   - Abra el visor nuevamente y elimine 1 imagen con **Delete**.
+   - Haga clic en el botón **X** de la ventana.
+   - Seleccione **"Enviar a Papelera y Salir"**.
+   - Verifique que el visor valida el éxito del borrado, deja limpia la carpeta de staging temporal y se cierra cleanly.
+   - Abra la Papelera del SO y confirme que la imagen se encuentra guardada allí.
+
+### Criterio de Éxito:
+- El diálogo modal se dispara correctamente tanto por `ESC` como por la `X` de la ventana.
+- "Descartar Cambios y Salir" devuelve las imágenes verificadas a su carpeta de origen.
+- "Enviar a Papelera y Salir" transfiere los archivos verificadamente a la Papelera del SO.
+

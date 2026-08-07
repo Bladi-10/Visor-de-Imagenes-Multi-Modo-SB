@@ -5,6 +5,7 @@ use relm4::{ComponentParts, ComponentSender, SimpleComponent};
 
 use crate::app::model::{AppModel, ImageItem, ViewMode};
 use crate::app::msg::AppMsg;
+use crate::components::confirm_dialog::show_close_confirmation_dialog;
 use crate::components::header::HeaderComponent;
 use crate::components::manual_dialog::show_manual_dialog;
 use crate::components::sidebar::SidebarComponent;
@@ -155,6 +156,16 @@ impl SimpleComponent for AppModel {
 
         root.add_controller(motion_controller);
 
+        let close_sender = sender.input_sender().clone();
+        root.connect_close_request(move |win| {
+            if TrashManager::has_staged_items() {
+                show_close_confirmation_dialog(win, close_sender.clone());
+                glib::Propagation::Stop
+            } else {
+                glib::Propagation::Proceed
+            }
+        });
+
         let widgets = AppWidgets {
             window: root,
             main_vbox,
@@ -208,8 +219,25 @@ impl SimpleComponent for AppModel {
                     self.is_clean_ui = false;
                 } else if self.is_fullscreen {
                     self.is_fullscreen = false;
+                } else if TrashManager::has_staged_items() || !self.undo_stack.is_empty() {
+                    if let Some(win) = relm4::main_application().active_window() {
+                        show_close_confirmation_dialog(&win, sender.input_sender().clone());
+                    }
                 } else {
-                    TrashManager::commit_trash();
+                    relm4::main_application().quit();
+                }
+            }
+            AppMsg::ConfirmCommitTrashAndExit => {
+                if let Err(e) = self.commit_all_staged_and_verify() {
+                    eprintln!("Error al enviar a la papelera del SO: {}", e);
+                } else {
+                    relm4::main_application().quit();
+                }
+            }
+            AppMsg::ConfirmRestoreAndExit => {
+                if let Err(e) = self.restore_all_staged_and_verify() {
+                    eprintln!("Error al restaurar imágenes a su ubicación original: {}", e);
+                } else {
                     relm4::main_application().quit();
                 }
             }
@@ -232,6 +260,7 @@ impl SimpleComponent for AppModel {
             }
             AppMsg::SetViewMode(mode) => {
                 self.view_mode = mode;
+                self.update_loaded_window();
             }
             AppMsg::ZoomIn => {
                 if self.is_fit_mode {

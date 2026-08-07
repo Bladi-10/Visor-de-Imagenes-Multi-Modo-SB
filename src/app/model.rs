@@ -24,11 +24,38 @@ pub struct ImageItem {
     pub metadata: Option<ImageMetadata>,
 }
 
+fn load_optimized_texture(path: &std::path::Path) -> Option<gdk::Texture> {
+    use gtk::glib;
+    use relm4::gtk::glib::object::Cast;
+    if let Ok(img) = image::open(path) {
+        let (w, h) = (img.width(), img.height());
+        let max_dim = 2560;
+        let resized = if w > max_dim || h > max_dim {
+            img.resize(max_dim, max_dim, image::imageops::FilterType::Triangle)
+        } else {
+            img
+        };
+        let rgba = resized.to_rgba8();
+        let (rw, rh) = (rgba.width(), rgba.height());
+        let bytes = glib::Bytes::from(&rgba.into_raw());
+        let texture = gdk::MemoryTexture::new(
+            rw as i32,
+            rh as i32,
+            gdk::MemoryFormat::R8g8b8a8,
+            &bytes,
+            (rw * 4) as usize,
+        );
+        Some(texture.upcast::<gdk::Texture>())
+    } else {
+        gdk::Texture::from_filename(path).ok()
+    }
+}
+
 impl ImageItem {
     #[allow(dead_code)]
     pub fn new(path: PathBuf) -> Self {
         let meta = extract_metadata(&path);
-        let texture = gdk::Texture::from_filename(&path).ok();
+        let texture = load_optimized_texture(&path);
         Self {
             path,
             texture,
@@ -46,7 +73,7 @@ impl ImageItem {
 
     pub fn load_texture(&mut self) {
         if self.texture.is_none() {
-            self.texture = gdk::Texture::from_filename(&self.path).ok();
+            self.texture = load_optimized_texture(&self.path);
         }
         if self.metadata.is_none() {
             self.metadata = Some(extract_metadata(&self.path));
@@ -198,6 +225,22 @@ impl AppModel {
         } else {
             false
         }
+    }
+
+    pub fn restore_all_staged_and_verify(&mut self) -> Result<(), String> {
+        let res = TrashManager::restore_all(&self.undo_stack);
+        if res.is_ok() {
+            self.undo_stack.clear();
+        }
+        res
+    }
+
+    pub fn commit_all_staged_and_verify(&mut self) -> Result<(), String> {
+        let res = TrashManager::commit_trash_and_verify();
+        if res.is_ok() {
+            self.undo_stack.clear();
+        }
+        res
     }
 }
 

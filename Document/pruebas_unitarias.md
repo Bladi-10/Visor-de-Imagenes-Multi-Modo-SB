@@ -3,22 +3,23 @@
 ## 1. Resumen de Ejecución de Pruebas
 
 - **Herramienta de Pruebas**: Cargo Test Framework (`cargo test`)
-- **Fecha de Ejecución**: 6 de Agosto de 2026
-- **Resultado General**: 9 pasadas / 0 fallidas / 0 ignoradas
+- **Fecha de Ejecución**: 7 de Agosto de 2026
+- **Resultado General**: 10 pasadas / 0 fallidas / 0 ignoradas
 
 ```
-running 9 tests
-test app::model::tests::test_visible_indices_row_layout ... ok
-test app::model::tests::test_window_indices_quad_mode ... ok
+running 10 tests
 test app::model::tests::test_view_mode_count ... ok
-test app::model::tests::test_window_indices_single_mode ... ok
+test app::model::tests::test_window_indices_quad_mode ... ok
 test utils::image_loader::tests::test_is_supported_image ... ok
-test utils::metadata::tests::test_mime_type_detection ... ok
+test app::model::tests::test_visible_indices_row_layout ... ok
 test utils::metadata::tests::test_format_size ... ok
+test app::model::tests::test_window_indices_single_mode ... ok
+test utils::metadata::tests::test_mime_type_detection ... ok
+test utils::trash_manager::tests::test_commit_trash_and_verify ... ok
 test utils::trash_manager::tests::test_staging_trash_and_restore ... ok
 test app::model::tests::test_circular_navigation ... ok
 
-test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
 ```
 
 ---
@@ -52,20 +53,26 @@ test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 ### 2.6 Retención y Restauración de Papelera (`test_staging_trash_and_restore`)
 - **Ubicación**: `./src/utils/trash_manager.rs`
-- **Objetivo**: Validar la retención en carpeta temporal al eliminar y la posterior restitución idéntica a su ruta original al deshacer con `Ctrl+Z`.
+- **Objetivo**: Validar la retención en carpeta temporal al eliminar y la posterior restitución idéntica a su ruta original con verificación de existencia en disco.
 - **Estado**: Exitoso.
 
-### 2.7 Detección de Formatos Soportados (`test_is_supported_image`)
+### 2.7 Envío Verificado a Papelera del SO (`test_commit_trash_and_verify`)
+- **Ubicación**: `./src/utils/trash_manager.rs`
+- **Objetivo**: Validar la transferencia de archivos de retención a la papelera del SO (`trash::delete`), verificando que no queden remanentes en el directorio temporal.
+- **Estado**: Exitoso.
+
+### 2.8 Detección de Formatos Soportados (`test_is_supported_image`)
 - **Ubicación**: `./src/utils/image_loader.rs`
 - **Objetivo**: Garantizar el filtrado adecuado de extensiones válidas de imágenes (jpg, png, webp, bmp, gif, tiff, ico).
 - **Estado**: Exitoso.
 
-### 2.8 Formateo de Tamaños de Archivo (`test_format_size`)
+### 2.9 Formateo de Tamaños de Archivo (`test_format_size`)
 - **Ubicación**: `./src/utils/metadata.rs`
 - **Objetivo**: Verificar la conversión correcta de bytes a cadenas legibles (B, KB, MB).
 - **Estado**: Exitoso.
 
-### 2.9 Detección de Tipos MIME (`test_mime_type_detection`)
+### 2.10 Detección de Tipos MIME (`test_mime_type_detection`)
 - **Ubicación**: `./src/utils/metadata.rs`
 - **Objetivo**: Validar la asignación de MIME types según la extensión del archivo.
 - **Estado**: Exitoso.
+

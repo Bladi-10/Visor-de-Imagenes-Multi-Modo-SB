@@ -84,3 +84,23 @@
   - **Diálogo Nativo Ágil**: Cambio de filtros MIME a patrones de extensión (`add_pattern("*.jpg")`, etc.) para navegación instantánea sin lectura de disco en el selector de archivos.
   - **Ordenación**: Confirmado y documentado el ordenamiento alfabético por nombre de archivo.
   - **Verificación**: Pasaron con éxito las 9 pruebas unitarias automatizadas (`cargo test`).
+
+### Entrada 13: Atención a Retroalimentación Retro 5.txt
+- **Fecha**: 7 de Agosto de 2026
+- **Detalles**:
+  - **Optimización de Consumo de RAM (Puntos 1, 2 y 4)**: Implementada decodificación de texturas redimensionadas a un máximo de 2560px en memoria (`ImageItem::load_texture` / `load_optimized_texture`). Con esto se reduce la huella de memoria por imagen de alta resolución (24MP+) de ~96MB a ~10-15MB por textura, evitando que la navegación iterativa en modos de múltiples imágenes eleve el consumo a 400MB.
+  - **Renderizado Inmediato al Cambiar Modo de Vista (Punto 3)**: Inclusión de `self.update_loaded_window()` en el manejador del mensaje `AppMsg::SetViewMode` en `src/app/view.rs`. Al presionar las teclas numéricas `1`, `2`, `3` o `4` o usar los botones de la barra superior, las texturas de las imágenes adicionales se cargan y renderizan inmediatamente sin requerir navegación adicional con las teclas de dirección.
+  - **Diálogo Modal de Confirmación al Cerrar (Punto 5)**: Intercepción del evento de cierre de ventana (`root.connect_close_request`) y de la tecla `ESC` / `AppMsg::CloseApp`. Si existen imágenes en la papelera de retención temporal:
+    - **Opción A ("Enviar a Papelera y Salir")**: Ejecuta `TrashManager::commit_trash_and_verify()`, el cual envía los archivos a la papelera del sistema operativo (`trash::delete`), verifica el éxito completo del borrado y que la carpeta temporal haya quedado vacía, y solo entonces cierra el aplicativo (`quit()`).
+    - **Opción B ("Descartar Cambios y Salir")**: Ejecuta `TrashManager::restore_all()`, restituyendo todas las imágenes temporales a su directorio y ruta original, verifica en disco la existencia de cada archivo restituido y vacía el staging antes de proceder al cierre.
+    - **Opción C ("Cancelar")**: Cierra el diálogo y mantiene la sesión activa.
+  - **Verificación Completa**: Ejecución y paso del 100% de las 10 pruebas unitarias automatizadas (`cargo test`), incluyendo las pruebas de validación de staging, borrado verificado y restauración confirmada. Compilación limpia (`cargo build`) con código de salida 0.
+
+### Entrada 14: Registro de Tarea Pendiente - Advertencia GTK Critical
+- **Fecha**: 7 de Agosto de 2026
+- **Detalles**:
+  - Por solicitud explícita del usuario ("Proxima tarea pero no ejecutar resolver"), se registró como tarea pendiente en [`Document/tasks.md`](file:///home/bladimir/Documentos/02%20PROYECTOS/06%20Visor%20de%20imagenes/Document/tasks.md) la investigación y solución de la advertencia GTK Critical:
+    `(herramientas-sistema:8400): Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`
+  - Se prevé validar la pertenencia del padre (`child.parent() == Some(row_box)`) antes de llamar a `remove()` en el componente `ViewportComponent`. No se aplicaron modificaciones de código en esta etapa.
+
+

@@ -40,9 +40,21 @@
   - [x] **Navegación Ágil en Selector de Archivos**: Cambio a filtro de patrones de extensión (`add_pattern("*.jpg")`, etc.) evitando la lectura lenta de archivos I/O en el diálogo nativo.
   - [x] **Plan de Pruebas Manuales**: Creación del instructivo [`Document/plan_pruebas_manuales.md`](file:///home/bladimir/Documentos/02%20PROYECTOS/06%20Visor%20de%20imagenes/Document/plan_pruebas_manuales.md).
   - [x] **Verificación**: Ejecución y paso del 100% de las 9 pruebas unitarias automatizadas (`cargo test`).
+- [x] **Implementación de Retroalimentación 5 (`Retro 5.txt`)**:
+  - [x] **Optimización de RAM en Texturas (Puntos 1, 2, 4)**: Carga de texturas con escala máxima a 2560px (`load_optimized_texture`), reduciendo el consumo por imagen de alta resolución de ~96MB a ~10-15MB y manteniendo estable el uso total de RAM.
+  - [x] **Renderizado Inmediato al Cambiar Modo (Punto 3)**: Invocación de `update_loaded_window()` en `SetViewMode` para renderizar imágenes instantáneamente tras presionar las teclas `1`, `2`, `3` o `4`.
+  - [x] **Diálogo de Confirmación con Verificación al Cerrar (Punto 5)**: Intercepción de `close-request` y `CloseApp` para desplegar el diálogo modal con opciones:
+    - *"Enviar a Papelera y Salir"*: Envía los archivos a la papelera del SO, **verifica el éxito del proceso y la limpieza del staging**, y luego cierra.
+    - *"Descartar Cambios y Salir"*: Restaura los archivos a sus carpetas originales, **verifica su existencia en disco**, y luego cierra.
+    - *"Cancelar"*: Cancela la acción de salida.
+  - [x] **Pruebas y Verificación**: Ejecución y aprobación del 100% de las 10 pruebas unitarias (`cargo test`) y compilación limpia (`cargo build`).
 
 ---
 
 ## Próximas Tareas (Pendientes)
 
-- [ ] Ninguna tarea pendiente. Todos los requerimientos especificados en Retro 4 han sido implementados y documentados.
+- [ ] **Corrección de Advertencia GTK Critical al Desmontar Widgets**: Investigar y corregir la advertencia en tiempo de ejecución:
+  `(herramientas-sistema:8400): Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`
+  asegurando la verificación del padre (`child.parent() == Some(row_box)`) antes de invocar `self.row_box.remove(&child)` en `ViewportComponent::update`.
+
+

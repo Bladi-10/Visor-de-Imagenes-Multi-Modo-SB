@@ -30,6 +30,8 @@ pub enum AppMsg {
     SingleFileSelected(Option<PathBuf>),
     TrashActiveImage,
     UndoDelete,
+    ConfirmCommitTrashAndExit,
+    ConfirmRestoreAndExit,
 
     // Visualizacion
     ToggleSidebar,
