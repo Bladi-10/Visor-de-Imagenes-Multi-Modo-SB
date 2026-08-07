@@ -27,12 +27,8 @@ pub enum AppMsg {
 
     // Gestion de Archivos y Papelera
     OpenSingleFile,
-    OpenFolder,
     SingleFileSelected(Option<PathBuf>),
-    FolderSelected(Option<PathBuf>),
     TrashActiveImage,
-    PermanentlyDeleteActiveImage,
-    ConfirmPermanentDelete,
     UndoDelete,
 
     // Visualizacion

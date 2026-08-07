@@ -63,6 +63,11 @@ impl ViewportComponent {
 
     pub fn update(&self, model: &AppModel) {
         while let Some(child) = self.row_box.first_child() {
+            if let Some(scroll) = child.downcast_ref::<gtk::ScrolledWindow>() {
+                if let Some(picture) = scroll.child().and_then(|c| c.downcast::<gtk::Picture>().ok()) {
+                    picture.set_paintable(None::<&gtk::gdk::Texture>);
+                }
+            }
             self.row_box.remove(&child);
         }
 

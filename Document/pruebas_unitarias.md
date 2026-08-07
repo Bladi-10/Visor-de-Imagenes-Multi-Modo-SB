@@ -3,21 +3,22 @@
 ## 1. Resumen de Ejecución de Pruebas
 
 - **Herramienta de Pruebas**: Cargo Test Framework (`cargo test`)
-- **Fecha de Ejecución**: 28 de Julio de 2026
-- **Resultado General**: 8 pasadas / 0 fallidas / 0 ignoradas
+- **Fecha de Ejecución**: 6 de Agosto de 2026
+- **Resultado General**: 9 pasadas / 0 fallidas / 0 ignoradas
 
 ```
-running 8 tests
-test app::model::tests::test_circular_navigation ... ok
-test utils::metadata::tests::test_format_size ... ok
+running 9 tests
 test app::model::tests::test_visible_indices_row_layout ... ok
-test utils::image_loader::tests::test_is_supported_image ... ok
+test app::model::tests::test_window_indices_quad_mode ... ok
 test app::model::tests::test_view_mode_count ... ok
+test app::model::tests::test_window_indices_single_mode ... ok
+test utils::image_loader::tests::test_is_supported_image ... ok
 test utils::metadata::tests::test_mime_type_detection ... ok
-test utils::trash_manager::tests::test_permanent_delete ... ok
-test utils::trash_manager::tests::test_record_creation ... ok
+test utils::metadata::tests::test_format_size ... ok
+test utils::trash_manager::tests::test_staging_trash_and_restore ... ok
+test app::model::tests::test_circular_navigation ... ok
 
-test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
 ```
 
 ---
@@ -39,27 +40,32 @@ test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 - **Objetivo**: Validar los métodos `count()` de los enumeradores `ViewMode` (Single = 1, Dual = 2, Triple = 3, Quad = 4).
 - **Estado**: Exitoso.
 
-### 2.4 Detección de Formatos Soportados (`test_is_supported_image`)
-- **Ubicación**: `./src/utils/image_loader.rs`
-- **Objetivo**: Garantizar el filtrado adecuado de extensiones válidas de imágenes (jpg, png, webp, bmp, gif) y rechazo de archivos no soportados.
+### 2.4 Ventana de Memoria en Modo Single (`test_window_indices_single_mode`)
+- **Ubicación**: `./src/app/model.rs`
+- **Objetivo**: Garantizar que en modo Single solo se mantienen cargados 3 elementos en la ventana de memoria (anterior, actual, siguiente).
 - **Estado**: Exitoso.
 
-### 2.5 Formateo de Tamaños de Archivo (`test_format_size`)
+### 2.5 Ventana de Memoria en Modo Multi-Vista (`test_window_indices_quad_mode`)
+- **Ubicación**: `./src/app/model.rs`
+- **Objetivo**: Validar que en modos múltiples (Quad) la ventana de precarga sostiene hasta 6 imágenes para fluidez inmediata.
+- **Estado**: Exitoso.
+
+### 2.6 Retención y Restauración de Papelera (`test_staging_trash_and_restore`)
+- **Ubicación**: `./src/utils/trash_manager.rs`
+- **Objetivo**: Validar la retención en carpeta temporal al eliminar y la posterior restitución idéntica a su ruta original al deshacer con `Ctrl+Z`.
+- **Estado**: Exitoso.
+
+### 2.7 Detección de Formatos Soportados (`test_is_supported_image`)
+- **Ubicación**: `./src/utils/image_loader.rs`
+- **Objetivo**: Garantizar el filtrado adecuado de extensiones válidas de imágenes (jpg, png, webp, bmp, gif, tiff, ico).
+- **Estado**: Exitoso.
+
+### 2.8 Formateo de Tamaños de Archivo (`test_format_size`)
 - **Ubicación**: `./src/utils/metadata.rs`
 - **Objetivo**: Verificar la conversión correcta de bytes a cadenas legibles (B, KB, MB).
 - **Estado**: Exitoso.
 
-### 2.6 Detección de Tipos MIME (`test_mime_type_detection`)
+### 2.9 Detección de Tipos MIME (`test_mime_type_detection`)
 - **Ubicación**: `./src/utils/metadata.rs`
 - **Objetivo**: Validar la asignación de MIME types según la extensión del archivo.
-- **Estado**: Exitoso.
-
-### 2.7 Eliminación Permanente de Archivos (`test_permanent_delete`)
-- **Ubicación**: `./src/utils/trash_manager.rs`
-- **Objetivo**: Verificar que el borrado permanente elimina físicamente el archivo del disco.
-- **Estado**: Exitoso.
-
-### 2.8 Registro de Historial de Borrado (`test_record_creation`)
-- **Ubicación**: `./src/utils/trash_manager.rs`
-- **Objetivo**: Validar la creación adecuada del registro de deshacer conteniendo ruta original e índice.
 - **Estado**: Exitoso.

@@ -43,18 +43,9 @@ impl HeaderComponent {
             sender_file.send(AppMsg::OpenSingleFile).unwrap();
         });
 
-        let btn_open_folder = gtk::Button::from_icon_name("folder-open-symbolic");
-        btn_open_folder.add_css_class("flat");
-        btn_open_folder.set_tooltip_text(Some("Abrir Carpeta de Imágenes"));
-        let sender_folder = sender.clone();
-        btn_open_folder.connect_clicked(move |_| {
-            sender_folder.send(AppMsg::OpenFolder).unwrap();
-        });
-
         box_left.append(&btn_theme);
         box_left.append(&btn_info);
         box_left.append(&btn_open_file);
-        box_left.append(&btn_open_folder);
         header_bar.pack_start(&box_left);
 
         // Selector de Modos (Centro)

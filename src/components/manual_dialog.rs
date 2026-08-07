@@ -41,7 +41,7 @@ pub fn show_manual_dialog(parent: &gtk::Window) {
             • Flecha Izquierda / Botón &lt; : Imagen anterior\n\
             • Flecha Derecha / Botón &gt; : Imagen siguiente\n\n\
             <b>Modo Ultra Limpio:</b>\n\
-            • Ctrl + F11: Oculta interfaz y muestra solo las imágenes\n\n\
+            • Ctrl + R: Oculta interfaz y muestra solo las imágenes\n\n\
             <b>Gestión de Archivos:</b>\n\
             • Supr / Delete: Mueve imagen activa a la papelera del SO\n\
             • Ctrl + Supr: Elimina permanentemente del disco\n\

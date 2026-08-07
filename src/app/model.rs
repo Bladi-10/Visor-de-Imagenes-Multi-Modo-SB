@@ -96,12 +96,20 @@ impl AppModel {
         if n == 0 {
             return Vec::new();
         }
-        if n <= 6 {
+
+        let (min_offset, max_offset) = match self.view_mode {
+            ViewMode::Single => (-1isize, 1isize),
+            ViewMode::Dual => (-1isize, 3isize),
+            ViewMode::Triple => (-1isize, 4isize),
+            ViewMode::Quad => (-1isize, 4isize),
+        };
+
+        if n <= (max_offset - min_offset + 1) as usize {
             return (0..n).collect();
         }
 
-        let mut indices = Vec::with_capacity(6);
-        for offset in -1isize..=4isize {
+        let mut indices = Vec::new();
+        for offset in min_offset..=max_offset {
             let idx = (self.current_index as isize + offset).rem_euclid(n as isize) as usize;
             if !indices.contains(&idx) {
                 indices.push(idx);
@@ -167,8 +175,7 @@ impl AppModel {
         }
 
         let item = self.images.remove(self.current_index);
-        let trashed = TrashManager::send_to_trash(&item.path).is_ok();
-        let record = TrashManager::create_record(item.path, self.current_index, trashed);
+        let record = TrashManager::send_to_trash_staging(&item.path, self.current_index).ok()?;
 
         if self.current_index >= self.images.len() && !self.images.is_empty() {
             self.current_index = self.images.len() - 1;
@@ -179,25 +186,10 @@ impl AppModel {
         Some(record)
     }
 
-    pub fn remove_current_permanently(&mut self) -> Option<PathBuf> {
-        if self.images.is_empty() {
-            return None;
-        }
-
-        let item = self.images.remove(self.current_index);
-        let _ = TrashManager::delete_permanently(&item.path);
-
-        if self.current_index >= self.images.len() && !self.images.is_empty() {
-            self.current_index = self.images.len() - 1;
-        }
-
-        self.update_loaded_window();
-        Some(item.path)
-    }
-
     pub fn undo_last_delete(&mut self) -> bool {
         if let Some(record) = self.undo_stack.pop() {
-            let restored_item = ImageItem::new_lazy(record.original_path);
+            let _ = TrashManager::restore_record(&record);
+            let restored_item = ImageItem::new_lazy(record.original_path.clone());
             let target_index = record.original_index.min(self.images.len());
             self.images.insert(target_index, restored_item);
             self.current_index = target_index;
@@ -259,22 +251,41 @@ mod tests {
     }
 
     #[test]
-    fn test_window_indices_6_images() {
+    fn test_window_indices_single_mode() {
         let mut model = AppModel::new();
         for i in 0..10 {
             model.images.push(ImageItem::new_lazy(PathBuf::from(format!("{}.jpg", i))));
         }
 
-        // current_index = 0 -> -1(9), 0(0), +1(1), +2(2), +3(3), +4(4)
+        // Single mode loads 3 images (-1, 0, +1)
+        model.view_mode = ViewMode::Single;
+        model.current_index = 0;
+        assert_eq!(model.get_window_indices(), vec![9, 0, 1]);
+
+        model.current_index = 5;
+        assert_eq!(model.get_window_indices(), vec![4, 5, 6]);
+
+        model.current_index = 9;
+        assert_eq!(model.get_window_indices(), vec![8, 9, 0]);
+    }
+
+    #[test]
+    fn test_window_indices_quad_mode() {
+        let mut model = AppModel::new();
+        for i in 0..10 {
+            model.images.push(ImageItem::new_lazy(PathBuf::from(format!("{}.jpg", i))));
+        }
+
+        // Quad mode loads up to 6 images (-1, 0, 1, 2, 3, 4)
+        model.view_mode = ViewMode::Quad;
         model.current_index = 0;
         assert_eq!(model.get_window_indices(), vec![9, 0, 1, 2, 3, 4]);
 
-        // current_index = 5 -> -1(4), 0(5), +1(6), +2(7), +3(8), +4(9)
         model.current_index = 5;
         assert_eq!(model.get_window_indices(), vec![4, 5, 6, 7, 8, 9]);
 
-        // current_index = 9 -> -1(8), 0(9), +1(0), +2(1), +3(2), +4(3)
         model.current_index = 9;
         assert_eq!(model.get_window_indices(), vec![8, 9, 0, 1, 2, 3]);
     }
 }
+

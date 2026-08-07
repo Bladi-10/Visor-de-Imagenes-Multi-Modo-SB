@@ -9,8 +9,9 @@ use crate::components::header::HeaderComponent;
 use crate::components::manual_dialog::show_manual_dialog;
 use crate::components::sidebar::SidebarComponent;
 use crate::components::viewport::ViewportComponent;
-use crate::utils::file_dialog::{pick_folder, pick_single_file};
+use crate::utils::file_dialog::pick_single_file;
 use crate::utils::image_loader::ImageLoader;
+use crate::utils::trash_manager::TrashManager;
 
 #[allow(dead_code)]
 pub struct AppWidgets {
@@ -49,7 +50,6 @@ impl SimpleComponent for AppModel {
         let viewport = ViewportComponent::new(sender.input_sender().clone());
         let sidebar = SidebarComponent::new();
 
-        // Contenedor principal vertical (HeaderBar arriba, contenido abajo)
         let main_vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .spacing(0)
@@ -101,11 +101,11 @@ impl SimpleComponent for AppModel {
                     glib::Propagation::Stop
                 }
                 gdk::Key::F11 => {
-                    if ctrl {
-                        input_sender.send(AppMsg::ToggleCleanUI).unwrap();
-                    } else {
-                        input_sender.send(AppMsg::ToggleFullscreen).unwrap();
-                    }
+                    input_sender.send(AppMsg::ToggleFullscreen).unwrap();
+                    glib::Propagation::Stop
+                }
+                gdk::Key::r | gdk::Key::R if ctrl => {
+                    input_sender.send(AppMsg::ToggleCleanUI).unwrap();
                     glib::Propagation::Stop
                 }
                 gdk::Key::Left => {
@@ -117,11 +117,7 @@ impl SimpleComponent for AppModel {
                     glib::Propagation::Stop
                 }
                 gdk::Key::Delete => {
-                    if ctrl {
-                        input_sender.send(AppMsg::PermanentlyDeleteActiveImage).unwrap();
-                    } else {
-                        input_sender.send(AppMsg::TrashActiveImage).unwrap();
-                    }
+                    input_sender.send(AppMsg::TrashActiveImage).unwrap();
                     glib::Propagation::Stop
                 }
                 gdk::Key::z | gdk::Key::Z if ctrl => {
@@ -184,9 +180,6 @@ impl SimpleComponent for AppModel {
             }
             AppMsg::ToggleCleanUI => {
                 self.is_clean_ui = !self.is_clean_ui;
-                if self.is_clean_ui {
-                    self.is_fullscreen = true;
-                }
             }
             AppMsg::ToggleDarkMode => {
                 let style_manager = adw::StyleManager::default();
@@ -213,8 +206,10 @@ impl SimpleComponent for AppModel {
             AppMsg::CloseApp => {
                 if self.is_clean_ui {
                     self.is_clean_ui = false;
+                } else if self.is_fullscreen {
                     self.is_fullscreen = false;
                 } else {
+                    TrashManager::commit_trash();
                     relm4::main_application().quit();
                 }
             }
@@ -271,59 +266,24 @@ impl SimpleComponent for AppModel {
                     }
                 });
             }
-            AppMsg::OpenFolder => {
-                let sender_input = sender.input_sender().clone();
-                relm4::spawn_local(async move {
-                    if let Some(win) = relm4::main_application().active_window() {
-                        let path_opt = pick_folder(&win).await;
-                        sender_input.send(AppMsg::FolderSelected(path_opt)).unwrap();
-                    }
-                });
-            }
             AppMsg::SingleFileSelected(Some(path)) => {
-                self.images.clear();
-                self.images.push(ImageItem::new_lazy(path));
-                self.current_index = 0;
+                if let Some(parent) = path.parent() {
+                    let paths = ImageLoader::scan_directory(parent);
+                    self.images = paths.into_iter().map(ImageItem::new_lazy).collect();
+                    if let Some(idx) = self.images.iter().position(|i| i.path == path) {
+                        self.current_index = idx;
+                    } else {
+                        self.current_index = 0;
+                    }
+                } else {
+                    self.images = vec![ImageItem::new_lazy(path)];
+                    self.current_index = 0;
+                }
                 self.update_loaded_window();
             }
             AppMsg::SingleFileSelected(None) => {}
-            AppMsg::FolderSelected(Some(folder_path)) => {
-                let paths = ImageLoader::scan_directory(&folder_path);
-                self.images = paths.into_iter().map(ImageItem::new_lazy).collect();
-                self.current_index = 0;
-                self.update_loaded_window();
-            }
-            AppMsg::FolderSelected(None) => {}
             AppMsg::TrashActiveImage => {
                 self.remove_current_and_trash();
-            }
-            AppMsg::PermanentlyDeleteActiveImage => {
-                if self.images.is_empty() {
-                    return;
-                }
-                let sender_input = sender.input_sender().clone();
-                if let Some(win) = relm4::main_application().active_window() {
-                    let dialog = gtk::MessageDialog::builder()
-                        .transient_for(&win)
-                        .modal(true)
-                        .message_type(gtk::MessageType::Question)
-                        .buttons(gtk::ButtonsType::OkCancel)
-                        .text("¿Eliminar permanentemente este archivo?")
-                        .secondary_text("Esta acción eliminará el archivo del disco y no se puede deshacer.")
-                        .build();
-
-                    dialog.connect_response(move |d, response| {
-                        if response == gtk::ResponseType::Ok {
-                            sender_input.send(AppMsg::ConfirmPermanentDelete).unwrap();
-                        }
-                        d.close();
-                    });
-
-                    dialog.present();
-                }
-            }
-            AppMsg::ConfirmPermanentDelete => {
-                self.remove_current_permanently();
             }
             AppMsg::UndoDelete => {
                 self.undo_last_delete();
@@ -335,18 +295,16 @@ impl SimpleComponent for AppModel {
     }
 
     fn update_view(&self, widgets: &mut Self::Widgets, _sender: ComponentSender<Self>) {
-        if self.is_clean_ui {
+        if self.is_fullscreen {
             widgets.window.set_fullscreened(true);
+            widgets.header.header_bar.set_decoration_layout(Some("close"));
             widgets.header.header_bar.set_visible(false);
-            widgets.sidebar.container.set_visible(false);
-        } else if self.is_fullscreen {
-            widgets.window.set_fullscreened(true);
-            widgets.sidebar.container.set_visible(self.is_sidebar_open);
-            widgets.header.header_bar.set_visible(false);
+            widgets.sidebar.container.set_visible(self.is_sidebar_open && !self.is_clean_ui);
         } else {
             widgets.window.set_fullscreened(false);
-            widgets.header.header_bar.set_visible(true);
-            widgets.sidebar.container.set_visible(self.is_sidebar_open);
+            widgets.header.header_bar.set_decoration_layout(None);
+            widgets.header.header_bar.set_visible(!self.is_clean_ui);
+            widgets.sidebar.container.set_visible(self.is_sidebar_open && !self.is_clean_ui);
         }
 
         widgets.header.update(self);

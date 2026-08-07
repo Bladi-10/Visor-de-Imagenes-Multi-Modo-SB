@@ -61,36 +61,26 @@
 - **Fecha**: 5 de Agosto de 2026
 - **Detalles**:
   - Se verificó la omisión en `.gitignore` de la carpeta `Retro/` y artefactos de compilación.
-  - Se actualizó el componente `src/components/header.rs` según las observaciones de `Retro/Retro 1.png`:
-    - Reemplazo del icono del botón de información por el icono simbólico monocromático `dialog-information-symbolic` con estilo `flat`.
-    - Eliminación de la etiqueta de texto central ("Imagen X de Y") dejando únicamente centrado el selector de modos de vista.
-    - Sustitución de las etiquetas de texto de los botones "1:1" y "Fit" por iconos simbólicos `zoom-original-symbolic` y `zoom-fit-best-symbolic`, eliminando el fondo y la sombra cuadrada con la clase CSS `flat`.
-    - Eliminación de los botones manuales de minimizar y maximizar de la barra superior para evitar duplicidad con los botones de control nativos de Libadwaita.
-  - Se ejecutaron las pruebas unitarias automatizadas (`cargo test`), aprobando los 8 test del sistema sin errores.
+  - Se actualizó el componente `src/components/header.rs` según las observaciones de `Retro/Retro 1.png`.
 
-### Entrada 10: Optimización de Rendimiento (Ventana de 6 Imágenes) y Mejoras de UI (Retro 2.png)
+### Entrada 10: Optimización de Rendimiento y Mejoras de UI (Retro 2.png)
 - **Fecha**: 6 de Agosto de 2026
 - **Detalles**:
-  - Se implementó la ventana deslizante de memoria de 6 imágenes (`new_lazy`, `load_texture`, `unload_texture`, `get_window_indices` y `update_loaded_window`) en `src/app/model.rs` y `src/app/view.rs`.
-  - Al abrir carpetas masivas de 1,000+ imágenes, solo se mantienen cargadas en memoria RAM 6 imágenes (1 atrás, la actual y 4 adelante). Las texturas fuera de ese rango se descargan automáticamente, manteniendo nulo el impacto en RAM/Swap.
-  - Se agregó el botón con icono nativo `dark-mode-symbolic` para alternar entre el modo oscuro y claro de Libadwaita.
-  - Se trasladó el botón de Pantalla Completa al bloque derecho de la barra de herramientas y se actualizó su atajo global a `Alt+F11`.
-  - Se implementó el menú flotante en pantalla completa que aparece cuando el cursor se sitúa cerca del límite superior de la pantalla (`y <= 25px`).
-  - Se eliminó el marco `gtk::Frame` alrededor de las imágenes en `src/components/viewport.rs`, descartando el borde blanco rectangular.
-  - Se añadió la regla CSS para eliminar la línea negra inferior divisoria de la barra de título en `src/main.rs`.
-  - Se añadieron pruebas unitarias automatizadas (`test_window_indices_6_images`), alcanzando 9/9 tests pasados con éxito.
+  - Se implementó la ventana deslizante de memoria de 6 imágenes en `src/app/model.rs`.
 
 ### Entrada 11: Correcciones de UI, Gestor de Arrastre con Mouse y Zoom Dinámico (Retro 3.png)
 - **Fecha**: 6 de Agosto de 2026
 - **Detalles**:
-  - Se solucionó el icono roto de modo oscuro en `src/components/header.rs` empleando el nombre estándar `weather-clear-night-symbolic`.
-  - Se corrigió el formateo Pango en `src/components/manual_dialog.rs` escapando los caracteres `<` y `>` (`&lt;` y `&gt;`), eliminando etiquetas HTML literales visibles.
-  - Se agruparon los botones de zoom en `box_zoom` dentro de `src/components/header.rs`, configurando su visibilidad dinámica para mostrarse en el modo de 1 imagen y ocultarse automáticamente en los modos múltiples (2, 3, 4 imágenes).
-  - Se mejoró la lógica de Zoom Out (`-`) en `src/app/view.rs` para permitir reducciones escalonadas por debajo del tamaño de ajuste/UI inicial.
-  - Se incorporó `gtk::GestureDrag` en `src/components/viewport.rs` permitiendo desplazamiento panning al arrastrar la imagen con clic izquierdo.
-  - Se restauró el atajo de pantalla completa a `F11` estándar.
-  - Se ejecutaron las 9 pruebas unitarias automatizadas del sistema (`cargo test`) con resultado exitoso.
+  - Se incorporó `gtk::GestureDrag` y zoom dinámico.
 
-
-
-
+### Entrada 12: Atención a Retroalimentación Retro 4.txt
+- **Fecha**: 6 de Agosto de 2026
+- **Detalles**:
+  - **Liberación de RAM**: Ventana de memoria dinámica (3 imágenes en modo Single, hasta 6 en modos múltiples) y desvinculación explícita de `Picture.set_paintable(None)` en `ViewportComponent` antes de eliminar widgets.
+  - **Desacoplamiento de Ultra Limpio y Pantalla Completa**: `Ctrl+R` alterará únicamente la interfaz visible sin forzar modo pantalla completa. `F11` gestiona pantalla completa. Ocultamiento automático de botones minimizar/maximizar en la barra flotante de título en pantalla completa.
+  - **Papelera Diferida (Staging Trash)**: Implementación de retención temporal en `/tmp/visor_imagenes_trash_staging/`. Al presionar `Delete` la imagen se mueve a la retención. Si se presiona `Ctrl+Z`, se restaura a su ruta original sin dejar duplicados en la papelera del SO. Al cerrar la app se procesa el envío a la papelera del SO (`trash::delete`).
+  - **Eliminación de Borrado Permanente**: Eliminación completa de `Ctrl+Delete`, diálogos y funciones asociadas.
+  - **Unificación de Apertura por Archivo**: Se eliminó el botón e ícono "Abrir Carpeta". Al abrir una imagen individual, se escanea y carga automáticamente el directorio completo contenedor.
+  - **Diálogo Nativo Ágil**: Cambio de filtros MIME a patrones de extensión (`add_pattern("*.jpg")`, etc.) para navegación instantánea sin lectura de disco en el selector de archivos.
+  - **Ordenación**: Confirmado y documentado el ordenamiento alfabético por nombre de archivo.
+  - **Verificación**: Pasaron con éxito las 9 pruebas unitarias automatizadas (`cargo test`).
