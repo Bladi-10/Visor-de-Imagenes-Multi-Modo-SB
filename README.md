@@ -83,6 +83,7 @@ El ejecutable optimizado se generará en `./target/release/herramientas-sistema`
 
 El proyecto incluye una completa documentación técnica en el directorio [`Document/`](Document/):
 
+- [`Document/licencia_gplv3_explicacion.md`](Document/licencia_gplv3_explicacion.md): Explicación detallada de permisos, restricciones y cuadro comparativo de la Licencia GNU GPLv3.
 - [`Document/ciclo_de_vida_y_aprendizaje_rust_gtk4.md`](Document/ciclo_de_vida_y_aprendizaje_rust_gtk4.md): Guía pedagógica exhaustiva sobre la arquitectura MVU de Relm4, el ciclo de vida de la app y la guía de aprendizaje de Rust y GTK4.
 - [`Document/arquitectura.md`](Document/arquitectura.md): Mapa arquitectónico de módulos del sistema.
 - [`Document/bitacora.md`](Document/bitacora.md): Historial cronológico de desarrollo, decisiones de diseño y resolución de retroalimentaciones.
@@ -93,6 +94,6 @@ El proyecto incluye una completa documentación técnica en el directorio [`Docu
 
 ## Licencia
 
-Este proyecto está distribuido bajo la **Licencia MIT**, la cual es la licencia de código abierto permisiva estándar más libre e inclusiva.
+Este proyecto está distribuido bajo la licencia **GNU General Public License v3.0 (GPLv3)**.
 
-Consulta el archivo [`LICENSE`](LICENSE) para obtener más detalles.
+Esta licencia garantiza que el software y cualquiera de sus derivados permanezcan libres y de código abierto para siempre. Consulta el archivo [`LICENSE`](LICENSE) y la guía [`Document/licencia_gplv3_explicacion.md`](Document/licencia_gplv3_explicacion.md) para más detalles.

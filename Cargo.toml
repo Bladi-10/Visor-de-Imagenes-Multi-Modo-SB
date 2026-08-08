@@ -2,8 +2,10 @@
 name = "herramientas-sistema"
 version = "0.1.0"
 edition = "2021"
-authors = ["Equipo de Desarrollo"]
-description = "Visor de imagenes multi-modo desarrollado en Rust, GTK4 y Relm4"
+authors = ["Bladimir - El Salvador"]
+description = "Visor de imágenes Multi-Modo SB desarrollado en Rust, GTK4 y Relm4"
+license = "GPL-3.0-or-later"
+
 
 [dependencies]
 gtk = { package = "gtk4", version = "0.9" }
