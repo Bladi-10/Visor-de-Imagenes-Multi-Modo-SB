@@ -307,5 +307,22 @@ mod tests {
         model.current_index = 9;
         assert_eq!(model.get_window_indices(), vec![8, 9, 0, 1, 2, 3]);
     }
+
+    #[test]
+    fn test_sliding_window_memory_limit() {
+        let mut model = AppModel::new();
+        for i in 0..500 {
+            model.images.push(ImageItem::new_lazy(PathBuf::from(format!("img_{}.jpg", i))));
+        }
+
+        model.view_mode = ViewMode::Single;
+        for _ in 0..1000 {
+            model.next_image();
+            // Verify window size is strictly 3 indices
+            let window = model.get_window_indices();
+            assert_eq!(window.len(), 3);
+        }
+    }
 }
+
 

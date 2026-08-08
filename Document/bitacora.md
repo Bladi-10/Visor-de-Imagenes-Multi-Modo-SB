@@ -101,12 +101,23 @@
 - **Detalles**:
   - Por solicitud explícita del usuario ("Proxima tarea pero no ejecutar resolver"), se registró como tarea pendiente en [`Document/tasks.md`](file:///home/bladimir/Documentos/02%20PROYECTOS/06%20Visor%20de%20imagenes/Document/tasks.md) la investigación y solución de la advertencia GTK Critical:
     `(herramientas-sistema:8400): Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`
-### Entrada 15: Atención a Retroalimentación de Pruebas Manuales (Puntos 7 y 8)
+### Entrada 16: Optimización de Consumo de RAM y Resolución de Fugas (Retro 6.txt)
 - **Fecha**: 7 de Agosto de 2026
 - **Detalles**:
-  - **Optimización de Renderizado e Instantaneidad UI (Punto 7)**: Se reemplazó la decodificación pesada por software en CPU de `image::open` (que causaba bloqueos de UI de 1 a 4 segundos al cambiar a modos de vista 2, 3 o 4, al abrir imágenes o al navegar) por la API nativa `gdk::Texture::from_filename(path)`. Esta utiliza los decodificadores optimizados en C de GTK4 (`libjpeg-turbo`/`libpng`) y aceleración por GPU. Se redujo el tiempo de carga y renderizado a **< 50ms (instantáneo)**.
-  - **Clarificación de Diálogos y Textos (Punto 8)**: Se eliminó la palabra "permanente" de la etiqueta en `src/components/confirm_dialog.rs` para evitar confusiones sobre la papelera del sistema. Se removió la referencia a `Ctrl + Supr` del diálogo del manual de usuario (`src/components/manual_dialog.rs`).
-  - **Pruebas y Verificación**: Compilación limpia y paso exitoso del 100% de las 10 pruebas unitarias (`cargo test`). Se resolvió además una condición de carrera entre hilos de prueba paralelos en `TrashManager` mediante `TEST_MUTEX` y verificación de directorio vacío.
+  - **Reutilización de Widgets en Viewport (`src/components/viewport.rs`)**: Se refactorizó el método `ViewportComponent::update` para reutilizar los componentes `gtk::ScrolledWindow` y `gtk::Picture` existentes cuando el número de vistas horizontales no cambia. Se eliminó la destrucción y recreación masiva de widgets GTK en cada navegación o actualización de la interfaz, deteniendo la acumulación de referencias en el loop de eventos de GLib.
+  - **Desvinculación Explícita de Paintables y Limpieza de Referencias**: Se aseguró la invocación de `set_paintable(None)` al desmontar o desvincular imágenes, permitiendo que GTK4 y GLib liberen inmediatamente los buffers de textura en memoria C.
+  - **Resolución de Advertencia GTK Critical**: Se incluyó la validación estricta del contenedor padre (`child.parent() == Some(row_box)`) antes de ejecutar la eliminación de componentes en `row_box.remove(&child)`, corrigiendo definitivamente el mensaje `Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`.
+  - **Pruebas y Verificación**: Se añadió la prueba unitaria `test_sliding_window_memory_limit` alcanzando 11 pruebas unitarias aprobadas al 100% (`cargo test`). Compilación limpia (`cargo build`) con código de salida 0.
+
+### Entrada 17: Hito Final de Validación de Rendimiento y Memoria RAM (996 Imágenes)
+- **Fecha**: 7 de Agosto de 2026
+- **Detalles**:
+  - **Medición de Memoria Base del Sistema Operativo**: Con una memoria RAM base del SO en 1.5 GB, la ejecución inicial del aplicativo incrementó el consumo únicamente a 1.6 GB (huella base ligera de 100 MB).
+  - **Carga Progresiva del Catálogo**: Al cargar el catálogo completo de 996 imágenes desde `Pictures 996`, el consumo de RAM ascendió paulatinamente hasta estabilizarse en 2.1 GB.
+  - **Prueba Intensiva de Navegación Continua**: Se ejecutó una prueba de estrés de navegación navegando con las teclas `<--` y `-->` a una frecuencia promedio de 0.5 segundos, recorriendo secuencialmente las 996 imágenes desde la primera hasta la última y retornando circularmente al inicio.
+  - **Resultado del Hito**: Se confirmó empíricamente que el consumo de memoria RAM se mantuvo estrictamente tope en **2.1 GB**, sin registrar ningún incremento adicional o fuga de memoria. El proyecto queda formalmente verificado, finalizado, listo para uso en producción y preparado para futuras extensiones.
+
+
 
 
 

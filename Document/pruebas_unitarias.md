@@ -4,22 +4,23 @@
 
 - **Herramienta de Pruebas**: Cargo Test Framework (`cargo test`)
 - **Fecha de Ejecución**: 7 de Agosto de 2026
-- **Resultado General**: 10 pasadas / 0 fallidas / 0 ignoradas
+- **Resultado General**: 11 pasadas / 0 fallidas / 0 ignoradas
 
 ```
-running 10 tests
+running 11 tests
 test app::model::tests::test_view_mode_count ... ok
+test app::model::tests::test_visible_indices_row_layout ... ok
+test app::model::tests::test_window_indices_single_mode ... ok
 test app::model::tests::test_window_indices_quad_mode ... ok
 test utils::image_loader::tests::test_is_supported_image ... ok
-test app::model::tests::test_visible_indices_row_layout ... ok
 test utils::metadata::tests::test_format_size ... ok
-test app::model::tests::test_window_indices_single_mode ... ok
 test utils::metadata::tests::test_mime_type_detection ... ok
-test utils::trash_manager::tests::test_commit_trash_and_verify ... ok
 test utils::trash_manager::tests::test_staging_trash_and_restore ... ok
+test utils::trash_manager::tests::test_commit_trash_and_verify ... ok
 test app::model::tests::test_circular_navigation ... ok
+test app::model::tests::test_sliding_window_memory_limit ... ok
 
-test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
 ```
 
 ---
@@ -75,6 +76,12 @@ test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 - **Ubicación**: `./src/utils/metadata.rs`
 - **Objetivo**: Validar la asignación de MIME types según la extensión del archivo.
 - **Estado**: Exitoso.
+
+### 2.11 Límite de Memoria de Ventana Deslizante (`test_sliding_window_memory_limit`)
+- **Ubicación**: `./src/app/model.rs`
+- **Objetivo**: Verificar que durante la navegación continua por cientos de imágenes (ej. 1000 iteraciones sobre 500 imágenes), la ventana deslizante mantenga estrictamente el límite máximo de índices activos.
+- **Estado**: Exitoso.
+
 
 ---
 

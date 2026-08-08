@@ -47,17 +47,22 @@
     - *"Enviar a Papelera y Salir"*: Envía los archivos a la papelera del SO, **verifica el éxito del proceso y la limpieza del staging**, y luego cierra.
     - *"Descartar Cambios y Salir"*: Restaura los archivos a sus carpetas originales, **verifica su existencia en disco**, y luego cierra.
     - *"Cancelar"*: Cancela la acción de salida.
-  - [x] **Atención a Retroalimentación de Pruebas Manuales (Puntos 7 y 8)**:
-  - [x] **Rendimiento e Instantaneidad UI (Punto 7)**: Sustitución de `image::open` por `gdk::Texture::from_filename(path)` nativo acelerado por GPU, reduciendo los tiempos de carga y renderizado al cambiar modos o navegar de 4s a **< 50ms (instantáneo)**.
-  - [x] **Diálogo de Confirmación (Punto 8)**: Remoción de la palabra "permanente" en `confirm_dialog.rs` y limpieza del atajo `Ctrl+Supr` en `manual_dialog.rs`.
-  - [x] **Verificación**: 10/10 pruebas unitarias aprobadas (`cargo test`).
+  - [x] **Atención a Retroalimentación Retro 6 (`Retro 6.txt`)**:
+    - [x] **Optimización de Consumo de RAM y Fugas de Memoria**: Reutilización en sitio de los widgets `gtk::ScrolledWindow` y `gtk::Picture` en `ViewportComponent::update`. Eliminación de la creación/destrucción masiva de widgets GTK por frame y desvinculación explícita de `picture.set_paintable(None)` al retirar texturas.
+    - [x] **Corrección de Advertencia GTK Critical**: Verificación estricta del contenedor padre (`child.parent() == Some(row_box)`) antes de `row_box.remove(&child)`, erradicando el mensaje `Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`.
+    - [x] **Prueba de Límite de Memoria de Ventana**: Adición del test `test_sliding_window_memory_limit` en `src/app/model.rs`.
+    - [x] **Verificación Total**: 11/11 pruebas unitarias aprobadas (`cargo test`).
+- [x] **Hito de Validación Final (Prueba de Estrés con 996 Imágenes)**:
+  - [x] Base SO en 1.5 GB -> Ejecución app en 1.6 GB -> Carga de 996 imágenes estabilizada en 2.1 GB.
+  - [x] Navegación continua a 0.5s por las 996 imágenes sin exceder los 2.1 GB.
+  - [x] Verificación empírica de ausencia total de fugas de memoria. Proyecto finalizado y preparado para producción/futuras mejoras.
 
 ---
 
 ## Próximas Tareas (Pendientes)
 
-- [ ] **Corrección de Advertencia GTK Critical al Desmontar Widgets**: Investigar y corregir la advertencia en tiempo de ejecución:
-  `(herramientas-sistema:8400): Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`
-  asegurando la verificación del padre (`child.parent() == Some(row_box)`) antes de invocar `self.row_box.remove(&child)` en `ViewportComponent::update`.
+*(Todas las tareas planificadas han sido completadas exitosamente)*
+
+
 
 
