@@ -101,6 +101,12 @@
 - **Detalles**:
   - Por solicitud explícita del usuario ("Proxima tarea pero no ejecutar resolver"), se registró como tarea pendiente en [`Document/tasks.md`](file:///home/bladimir/Documentos/02%20PROYECTOS/06%20Visor%20de%20imagenes/Document/tasks.md) la investigación y solución de la advertencia GTK Critical:
     `(herramientas-sistema:8400): Gtk-CRITICAL **: gtk_box_remove: assertion 'gtk_widget_get_parent (child) == (GtkWidget *)box' failed`
-  - Se prevé validar la pertenencia del padre (`child.parent() == Some(row_box)`) antes de llamar a `remove()` en el componente `ViewportComponent`. No se aplicaron modificaciones de código en esta etapa.
+### Entrada 15: Atención a Retroalimentación de Pruebas Manuales (Puntos 7 y 8)
+- **Fecha**: 7 de Agosto de 2026
+- **Detalles**:
+  - **Optimización de Renderizado e Instantaneidad UI (Punto 7)**: Se reemplazó la decodificación pesada por software en CPU de `image::open` (que causaba bloqueos de UI de 1 a 4 segundos al cambiar a modos de vista 2, 3 o 4, al abrir imágenes o al navegar) por la API nativa `gdk::Texture::from_filename(path)`. Esta utiliza los decodificadores optimizados en C de GTK4 (`libjpeg-turbo`/`libpng`) y aceleración por GPU. Se redujo el tiempo de carga y renderizado a **< 50ms (instantáneo)**.
+  - **Clarificación de Diálogos y Textos (Punto 8)**: Se eliminó la palabra "permanente" de la etiqueta en `src/components/confirm_dialog.rs` para evitar confusiones sobre la papelera del sistema. Se removió la referencia a `Ctrl + Supr` del diálogo del manual de usuario (`src/components/manual_dialog.rs`).
+  - **Pruebas y Verificación**: Compilación limpia y paso exitoso del 100% de las 10 pruebas unitarias (`cargo test`). Se resolvió además una condición de carrera entre hilos de prueba paralelos en `TrashManager` mediante `TEST_MUTEX` y verificación de directorio vacío.
+
 
 

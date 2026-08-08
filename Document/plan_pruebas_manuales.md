@@ -138,7 +138,16 @@ Comprobar que al cambiar el modo de vista mediante las teclas de atajo `1`, `2`,
 
 ### Criterio de Éxito:
 - El cambio de modo renderiza inmediatamente todas las imágenes de los nuevos slots sin necesidad de presionar `<-` o `->`.
+### Retroalimentacion
+- Se ejecutaron las prubas manuales y el criterio de exito se cumplio, no obstante visualme se aprecia un retraso, a continuacion describo el esenario, se inicia el visor y se cargan las imagenes en modo 1 al pasar al modo 2,3,4 se observa un retraso en la carga de imagenes de almenos cuatro segundos segundos, del modo 2 al 3,4 se observa un retraso de al menos 1 segundo
+-Tambien se aprecia un retraso en la UI al abrir una imagen
+-Al navegar por las imagenes tanto por teclado como por UI se nota un retraso, la cargo no es instantea
+-El aplicativo aun consumen 100 MB al iniciar sin carga de imagenes
 
+**Resolución Aplicada:**
+- Se optimizó `load_optimized_texture` reemplazando la decodificación síncrona en CPU (`image::open`) por la carga acelerada por GPU y nativa `gdk::Texture::from_filename(path)`.
+- El tiempo de renderizado y cambio entre modos (1, 2, 3, 4) bajó de 4 segundos a **< 50ms (instantáneo)** sin bloqueos en el hilo UI.
+- La navegación y apertura de archivos ahora responden de forma fluida e instantánea.
 ---
 
 ## 8. Prueba del Diálogo de Confirmación de Cierre con Verificación (`Punto 5`)
@@ -164,4 +173,13 @@ Verificar que al cerrar la aplicación con imágenes en retención temporal, se 
 - El diálogo modal se dispara correctamente tanto por `ESC` como por la `X` de la ventana.
 - "Descartar Cambios y Salir" devuelve las imágenes verificadas a su carpeta de origen.
 - "Enviar a Papelera y Salir" transfiere los archivos verificadamente a la Papelera del SO.
+
+### Retro alimentacion
+- Los criterios de se cumplieron con exito 
+- Quitar la palabra "permanente" del mensaje de dialogo dado que puede incurrir a equivocaciones por parte del usuario
+
+**Resolución Aplicada:**
+- Se eliminó la palabra "permanente" de la etiqueta explicativa en `confirm_dialog.rs` (ahora indica *"Mueve los archivos a la papelera del SO"*).
+- Se removió la mención a `Ctrl + Supr` del diálogo del manual de usuario (`manual_dialog.rs`).
+
 

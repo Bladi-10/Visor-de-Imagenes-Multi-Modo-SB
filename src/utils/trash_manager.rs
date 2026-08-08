@@ -90,7 +90,11 @@ impl TrashManager {
         }
 
         let staging_dir = Self::staging_dir();
-        let _ = fs::remove_dir_all(&staging_dir);
+        if let Ok(mut entries) = fs::read_dir(&staging_dir) {
+            if entries.next().is_none() {
+                let _ = fs::remove_dir_all(&staging_dir);
+            }
+        }
         Ok(())
     }
 
@@ -121,7 +125,11 @@ impl TrashManager {
             }
         }
 
-        let _ = fs::remove_dir_all(&staging_dir);
+        if let Ok(mut entries) = fs::read_dir(&staging_dir) {
+            if entries.next().is_none() {
+                let _ = fs::remove_dir_all(&staging_dir);
+            }
+        }
         Ok(())
     }
 }
@@ -130,9 +138,13 @@ impl TrashManager {
 mod tests {
     use super::*;
     use std::io::Write;
+    use std::sync::Mutex;
+
+    static TEST_MUTEX: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_staging_trash_and_restore() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
         let temp_dir = std::env::temp_dir();
         let test_file = temp_dir.join("visor_test_staging_orig.txt");
 
@@ -156,6 +168,7 @@ mod tests {
 
     #[test]
     fn test_commit_trash_and_verify() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
         let base_dir = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
         let test_file = base_dir.join("visor_test_commit_orig.txt");
 

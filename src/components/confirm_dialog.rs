@@ -30,7 +30,7 @@ pub fn show_close_confirmation_dialog(parent: &impl IsA<gtk::Window>, sender: Se
     let desc_label = gtk::Label::builder()
         .label(
             "Hay imágenes en la papelera de retención temporal.\n\
-            • <b>Enviar a Papelera y Salir:</b> Mueve permanentemente los archivos a la papelera del SO.\n\
+            • <b>Enviar a Papelera y Salir:</b> Mueve los archivos a la papelera del SO.\n\
             • <b>Descartar Cambios y Salir:</b> Restaura todos los archivos a sus carpetas originales.",
         )
         .use_markup(true)

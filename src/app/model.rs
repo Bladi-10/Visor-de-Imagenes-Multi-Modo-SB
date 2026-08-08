@@ -25,30 +25,7 @@ pub struct ImageItem {
 }
 
 fn load_optimized_texture(path: &std::path::Path) -> Option<gdk::Texture> {
-    use gtk::glib;
-    use relm4::gtk::glib::object::Cast;
-    if let Ok(img) = image::open(path) {
-        let (w, h) = (img.width(), img.height());
-        let max_dim = 2560;
-        let resized = if w > max_dim || h > max_dim {
-            img.resize(max_dim, max_dim, image::imageops::FilterType::Triangle)
-        } else {
-            img
-        };
-        let rgba = resized.to_rgba8();
-        let (rw, rh) = (rgba.width(), rgba.height());
-        let bytes = glib::Bytes::from(&rgba.into_raw());
-        let texture = gdk::MemoryTexture::new(
-            rw as i32,
-            rh as i32,
-            gdk::MemoryFormat::R8g8b8a8,
-            &bytes,
-            (rw * 4) as usize,
-        );
-        Some(texture.upcast::<gdk::Texture>())
-    } else {
-        gdk::Texture::from_filename(path).ok()
-    }
+    gdk::Texture::from_filename(path).ok()
 }
 
 impl ImageItem {

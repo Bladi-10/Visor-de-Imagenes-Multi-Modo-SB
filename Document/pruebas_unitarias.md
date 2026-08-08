@@ -76,3 +76,14 @@ test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 - **Objetivo**: Validar la asignación de MIME types según la extensión del archivo.
 - **Estado**: Exitoso.
 
+---
+
+## 3. Hallazgos y Correcciones en Pruebas Concurrente
+
+- **Identificación del Problema**: Durante la ejecución en paralelo de `cargo test`, se identificó una condición de carrera entre `test_staging_trash_and_restore` y `test_commit_trash_and_verify`. Ambas pruebas compartían el directorio de retención temporal (`visor_imagenes_trash_staging`). Al finalizar la restauración, `remove_dir_all(&staging_dir)` eliminaba de forma concurrente los archivos temporales de la otra prueba en ejecución.
+- **Solución Implementada**:
+  1. Se incorporó un cerrojo estático `static TEST_MUTEX: Mutex<()>` en las pruebas de `src/utils/trash_manager.rs` para serializar la manipulación del sistema de archivos entre hilos.
+  2. Se modificaron los métodos `restore_all` y `commit_trash_and_verify` para eliminar el directorio de staging únicamente cuando la lectura de entradas confirme que se encuentra completamente vacío (`entries.next().is_none()`).
+- **Resultado de la Corrección**: El 100% de los 10 tests pasa de forma determinista tanto en ejecución secuencial como paralela multi-hilo (`cargo test`).
+
+

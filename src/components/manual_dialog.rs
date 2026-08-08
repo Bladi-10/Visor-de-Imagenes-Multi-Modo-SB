@@ -44,7 +44,6 @@ pub fn show_manual_dialog(parent: &gtk::Window) {
             • Ctrl + R: Oculta interfaz y muestra solo las imágenes\n\n\
             <b>Gestión de Archivos:</b>\n\
             • Supr / Delete: Mueve imagen activa a la papelera del SO\n\
-            • Ctrl + Supr: Elimina permanentemente del disco\n\
             • Ctrl + Z: Deshace el último borrado realizado\n\n\
             <b>Otros Atajos:</b>\n\
             • F11: Pantalla completa estándar\n\
